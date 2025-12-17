@@ -1,4 +1,6 @@
-# Telegram Automation Tool
+# telegaram-server-API
+
+## Telegram Automation Tool
 
 Tool tự động hóa các thao tác trên Telegram Web sử dụng Playwright.
 
@@ -135,4 +137,3 @@ telegram-automation/
 ## License
 
 MIT
-

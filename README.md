@@ -1,138 +1,87 @@
-# telegaram-server-API
+# Telegram Automation API (FastAPI + Playwright)
 
-## Telegram Automation Tool
+Server API (FastAPI) để tự động hoá các thao tác trên **Telegram Web** bằng **Playwright**.
 
-Tool tự động hóa các thao tác trên Telegram Web sử dụng Playwright.
+- **Swagger/OpenAPI**: `/docs`
+- **Tài liệu usage**: `docs/API.md`
+- **Kiến trúc**: `docs/ARCHITECTURE.md`
+- **Runbook/triển khai**: `docs/DEPLOYMENT.md`
 
-## Server API (FastAPI)
+## Tính năng chính
 
-Repo hiện hỗ trợ chạy như **Server API** (Swagger/OpenAPI):
-- Tài liệu: `docs/API.md`
-- Swagger UI: `/docs`
-
-Chạy nhanh:
-
-```bash
-pip install -r requirements.txt
-playwright install chromium
-python -m uvicorn api.main:app --app-dir src --host 127.0.0.1 --port 8000 --reload
-```
-
-## Tính năng
-
-### Core Features
-- ✅ Đăng nhập với số điện thoại và OTP
-- ✅ Lưu và tái sử dụng session
-- ✅ Kiểm tra số điện thoại có Telegram không
-- ✅ Thêm bạn/contact
-- ✅ Tạo nhóm
-- ✅ Quản lý nhóm (thêm thành viên, liệt kê nhóm)
-
-### Enhanced Features (tích hợp từ Strix)
-- ✅ **Tab Management:** Quản lý nhiều tabs đồng thời
-- ✅ **Telemetry & Tracing:** Tracking tất cả operations tự động
-- ✅ **Notes Management:** Ghi chú và quản lý findings
-- ✅ **Reporting System:** Tự động generate reports
-- ✅ **Console Logs:** Capture và analyze console logs
-- ✅ **Screenshots:** Tự động capture screenshots cho mỗi operation
-- ✅ **Statistics:** Theo dõi performance và success rate
+- **Auth/login flow qua API**: start login → submit OTP → (tuỳ chọn) submit 2FA → lưu session.
+- **Sessions**: liệt kê/xoá session theo số điện thoại.
+- **Contacts**: check số có Telegram, add contact.
+- **Groups**: tạo nhóm, add members, list groups, group info.
+- **Runs/Reports/Notes**: lưu vết chạy và artefacts phục vụ theo dõi/debug.
 
 ## Cài đặt
 
-### 1. Cài đặt dependencies
+Yêu cầu:
+- Python 3.10+ (khuyến nghị)
+
+Cài dependencies và browser:
 
 ```bash
 pip install -r requirements.txt
 playwright install chromium
 ```
 
-### 2. Cấu hình (tùy chọn)
+## Chạy server
 
-Tạo file `.env` và cấu hình các biến môi trường:
+Dev (hot reload):
 
 ```bash
-# Browser Configuration
-# Sử dụng Enhanced Browser với tab management (mặc định: true)
-USE_ENHANCED_BROWSER=true
-
-# SOCKS5 Proxy Configuration (tùy chọn)
-# Định dạng: ip:port:username:password
-# Ví dụ: PROXY_SOCKS5=160.187.240.180:38102:ypMH7pF:b7Dnr
-PROXY_SOCKS5=
-
-# Optional: Browser timeout settings (in milliseconds)
-# BROWSER_TIMEOUT=30000
-
-# Optional: Logging level (DEBUG, INFO, WARNING, ERROR)
-# LOG_LEVEL=INFO
-
-# Optional: Custom paths
-# SESSIONS_DIR=sessions
-# NOTES_DIR=notes
-# REPORTS_DIR=reports
-# TELEGRAM_RUNS_DIR=telegram_runs
+python -m uvicorn api.main:app --app-dir src --host 127.0.0.1 --port 8000 --reload
 ```
 
-## Sử dụng
+Hoặc chạy entrypoint tiện dụng (tự thêm `src/` vào `PYTHONPATH`):
 
-Repo đã chuyển sang mô hình **Server API**. Xem ví dụ gọi API trong `docs/API.md` hoặc mở Swagger UI tại `/docs`.
+```bash
+python run_api.py
+```
 
-## Desktop/Installer
+## Cấu hình (tuỳ chọn)
 
-Phần Desktop GUI/Installer đã được **loại bỏ khỏi repo** để tập trung vào hệ thống **Server API**.
+Tạo file `.env` để cấu hình (ví dụ):
+
+```bash
+USE_ENHANCED_BROWSER=true
+PROXY_SOCKS5=
+LOG_LEVEL=INFO
+```
+
+## API nhanh
+
+Xem ví dụ chi tiết trong `docs/API.md`. Tóm tắt endpoints:
+
+- **Health/Version**: `GET /health`, `GET /version`
+- **Auth**: `POST /auth/start`, `GET /auth/status/{job_id}`, `POST /auth/submit-otp`, `POST /auth/submit-2fa`
+- **Sessions**: `GET /sessions`, `DELETE /sessions/{phone}`
+- **Contacts**: `POST /contacts/check-phone`, `POST /contacts/add`
+- **Groups**: `POST /groups/create`, `POST /groups/add-members`, `GET /groups/list`, `GET /groups/info`
+- **Runs/Reports**: `GET /runs`, `GET /runs/{run_name}`, `GET /reports`
+- **Notes**: `POST /notes`, `GET /notes`, `GET /notes/{note_id}`, `PATCH /notes/{note_id}`, `DELETE /notes/{note_id}`
 
 ## Cấu trúc dự án
 
 ```
 telegram-automation/
 ├── src/
-│   ├── telegram_bot/
-│   │   ├── __init__.py
-│   │   ├── browser.py          # Browser management
-│   │   ├── session.py          # Session management
-│   │   ├── login.py            # Login flow
-│   │   ├── contacts.py         # Contact operations
-│   │   ├── groups.py           # Group operations
-│   │   └── utils.py            # Utilities
-│   └── cli.py                  # CLI interface
-├── docs/                       # Server API docs
-├── scripts/                    # Maintenance scripts (cleanup, etc.)
-├── run_api.py                  # API entrypoint (from source)
-├── sessions/                   # Saved sessions (auto-created)
+│   ├── api/                    # FastAPI server (routers/schemas/services)
+│   └── telegram_bot/           # Automation domain (Playwright, sessions, reports, notes)
+├── docs/                       # API/Architecture/Deployment docs
+├── scripts/                    # Maintenance scripts
+├── run_api.py                  # Entrypoint chạy từ source
 ├── requirements.txt
 └── README.md
 ```
 
-## Lưu ý quan trọng
+## Lưu ý vận hành
 
-1. **Telegram Anti-Bot:** Telegram có thể phát hiện automation. Tool này sử dụng các kỹ thuật để giảm thiểu phát hiện, nhưng không đảm bảo 100%.
-
-2. **Session Management:** Session được lưu trong thư mục `sessions/`. Mỗi số điện thoại có một file session riêng.
-
-3. **OTP Input:** Khi đăng nhập, bạn sẽ được yêu cầu nhập OTP trong terminal. Tool sẽ chờ tối đa 5 phút.
-
-4. **Browser Mode:** Mặc định browser chạy ở chế độ visible (`headless=False`) để dễ debug và nhập OTP. Có thể dùng `--headless` flag để chạy headless.
-
-5. **UI Changes:** Telegram Web có thể thay đổi UI. Nếu tool không hoạt động, có thể cần cập nhật selectors trong code.
-
-## Troubleshooting
-
-### Browser không mở
-
-- Đảm bảo đã cài đặt Playwright: `playwright install chromium`
-- Kiểm tra dependencies: `pip install -r requirements.txt`
-
-### Login thất bại
-
-- Kiểm tra số điện thoại đúng format (có country code, ví dụ: +855762923340)
-- Đảm bảo OTP được nhập đúng và kịp thời
-- Thử xóa session cũ và đăng nhập lại: Xóa file trong `sessions/` hoặc dùng `--force`
-
-### Không tìm thấy elements
-
-- Telegram có thể đã thay đổi UI
-- Thử chạy với `headless=False` để xem browser và debug
-- Kiểm tra logs để xem lỗi cụ thể
+- **Telegram UI thay đổi**: selectors có thể cần cập nhật theo Telegram Web.
+- **Dữ liệu runtime**: `sessions/`, `notes/`, `reports/`, `telegram_runs/` là thư mục runtime (đã được ignore trong `.gitignore`).
+- **Chạy trên Windows/service**: đảm bảo working directory là root project để đường dẫn tương đối hoạt động đúng (xem `docs/DEPLOYMENT.md`).
 
 ## License
 

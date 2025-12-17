@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "telegram-automation"
+version = "0.1.0"
+description = "Tool tự động hóa các thao tác trên Telegram Web"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "playwright>=1.40.0",
+    "python-dotenv>=1.0.0",
+    "click>=8.1.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "pydantic-settings>=2.5.0",
+]
+
+[project.scripts]
+telegram-automation-api = "api.main:app"
+

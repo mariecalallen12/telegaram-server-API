@@ -1,0 +1,2 @@
+"""Telegram Automation Tool package."""
+
